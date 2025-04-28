@@ -71,7 +71,7 @@
     <footer *ngIf="tasks.length > 0" class="footer">
       <!-- This should be `0 items left` by default -->
       <span class="todo-count"
-        ><strong>{{ tasks.length }} </strong>
+        ><strong>{{ totalTasksPending() }} </strong>
         <strong *ngIf="tasks.length === 1">item left</strong>
         <strong *ngIf="tasks.length > 1">items left</strong>
       </span>
@@ -80,30 +80,18 @@
         <li>
           <a
             routerLink="/"
-            [queryParams]="{ filter: 'all' }"
-            (click)="changeFilter()"
-            [class.selected]="filter == 'all'"
+            routerLinkActive="selected"
+            [routerLinkActiveOptions]="{ exact: true }"
+            
             >All</a
           >
           <!-- <a routerLink="/" [queryParams]="{}" (click)="changeFilter('all')" [class.selected]="filter=='all'" routerLink="/" >All</a> -->
         </li>
         <li>
-          <a
-            (click)="changeFilter()"
-            [queryParams]="{ filter: 'pending' }"
-            [class.selected]="filter == 'pending'"
-            routerLink="/"
-            >Pending</a
-          >
+          <a routerLink="/pending" routerLinkActive="selected" >Pending</a>
         </li>
         <li>
-          <a
-            (click)="changeFilter()"
-            [queryParams]="{ filter: 'completed' }"
-            [class.selected]="filter == 'completed'"
-            routerLink="/"
-            >Completed</a
-          >
+          <a routerLink="/completed" routerLinkActive="selected">Completed</a>
         </li>
       </ul>
       <!-- Hidden if no completed items are left ↓ -->

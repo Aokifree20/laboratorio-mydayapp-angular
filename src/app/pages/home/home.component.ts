@@ -12,7 +12,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
   tasks: Task[] = [];
-  filter: string = 'all';
+  filter: 'all' | 'pending' | 'completed' = 'all';
   newTaskCrtl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.minLength(3)],
@@ -22,6 +22,9 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.getTasks();
+    this.route.url.subscribe(() => {
+      this.applyRouteFilter();
+    });
   }
 
   getTasks() {
@@ -78,14 +81,9 @@ export class HomeComponent implements OnInit {
     return false;
   }
 
-  totalTasksPending() {
-    let total = 0;
-    for (const task of this.tasks) {
-      if (!task.completed) {
-        total++;
-      }
-    }
-    return total;
+  totalTasksPending(): number {
+    const allTasks = JSON.parse(localStorage.getItem('mydayapp-angular') || '[]');
+    return allTasks.filter((task: Task) => !task.completed).length;
   }
 
   clearCompletedTasks() {
@@ -93,18 +91,36 @@ export class HomeComponent implements OnInit {
     localStorage.setItem('mydayapp-angular', JSON.stringify(this.tasks));
   }
 
-  changeFilter() {
-    this.filter = this.route.snapshot.queryParamMap.get('filter') || 'all';
-    this.getTasks();
+  // changeFilter(filter: 'all' | 'pending' | 'completed') {
+  //   this.filter = filter;
+  //   this.applyFilter();
+  // }
+  
+  private applyFilter(): void {
+    this.getTasks(); // Obtener todas las tareas primero
     
-    this.tasks = this.tasks.filter((task) => {
-      if (this.filter === 'all') {
-        return true;
-      }
-      if (this.filter === 'pending') {
-        return !task.completed;
-      }
-      return task.completed;
-    });
+    if (this.filter !== 'all') {
+      this.tasks = this.tasks.filter(task => {
+        return this.filter === 'pending' ? !task.completed : task.completed;
+      });
+    }
+  }
+
+  private applyRouteFilter(): void {
+    //const path = window.location.pathname.split('/').pop();
+    const path = this.router.url.split('/').pop();
+    
+    switch (path) {
+      case 'pending':
+        this.filter = 'pending';
+        break;
+      case 'completed':
+        this.filter = 'completed';
+        break;
+      default:
+        this.filter = 'all';
+    }
+  
+    this.applyFilter();
   }
 }
